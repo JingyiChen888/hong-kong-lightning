@@ -1,7 +1,8 @@
 # When Lightning Strikes Hong Kong
 
-Most days over Hong Kong record no cloud-to-ground lightning. Then the summer
-storms arrive, and a single day can produce more than fourteen thousand strikes.
+Across twenty complete years, no cloud-to-ground lightning was recorded over Hong
+Kong on 77% of days. But when the summer storms arrive, a single day can bring more
+than fourteen thousand strikes.
 This project turns twenty complete years of daily observations into a circular
 calendar, revealing when Hong Kong's lightning season begins, peaks and disappears.
 
