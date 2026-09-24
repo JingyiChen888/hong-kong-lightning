@@ -134,7 +134,7 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
                 bottom=base,
                 color=colours(intensity),
                 edgecolor="none",
-                alpha=0.34 + intensity * 0.66,
+                alpha=0.18 + intensity * 0.82,
             )
 
         # A faint circle keeps a quiet year legible without pretending zero is missing.
@@ -144,7 +144,7 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
             [base + ring_height / 2] * len(circle),
             color="#7e88a3",
             linewidth=0.35,
-            alpha=0.13,
+            alpha=0.09,
             zorder=0,
         )
 
@@ -156,17 +156,54 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
             continue
         theta = (day_index + 0.5) * day_angle
         strength = log_colour(total) / max_corona
-        length = 0.16 + 1.75 * strength**1.55
+        length = 0.05 + 1.86 * strength**1.75
         colour = colours(norm(log_colour(min(total, 15_000))))
+        # A broad translucent stroke gives strong days an electric halo while
+        # preserving the exact calendar angle and data-driven length.
+        glow = ax.plot(
+            [theta, theta],
+            [outer_ring + 0.18, outer_ring + 0.18 + length],
+            color=colour,
+            linewidth=2.2 + 3.0 * strength,
+            alpha=0.025 + 0.11 * strength,
+            solid_capstyle="round",
+        )[0]
+        glow.set_solid_capstyle("round")
         line = ax.plot(
             [theta, theta],
             [outer_ring + 0.18, outer_ring + 0.18 + length],
             color=colour,
             linewidth=0.55 + 1.15 * strength,
-            alpha=0.28 + 0.70 * strength,
+            alpha=0.16 + 0.82 * strength,
             solid_capstyle="round",
         )[0]
         line.set_solid_capstyle("round")
+
+    # Locate the record day in the rings instead of leaving the peak as text only.
+    if peak_date.year in years:
+        peak_ring = years.index(peak_date.year)
+        peak_theta = (calendar_position(peak_date) + 0.5) * day_angle
+        peak_radius = inner_radius + peak_ring * ring_step + ring_height / 2
+        ax.scatter(
+            [peak_theta],
+            [peak_radius],
+            s=125,
+            facecolors="none",
+            edgecolors="#fff1ae",
+            linewidths=3.2,
+            alpha=0.12,
+            zorder=5,
+        )
+        ax.scatter(
+            [peak_theta],
+            [peak_radius],
+            s=34,
+            facecolors="none",
+            edgecolors="#fff7cf",
+            linewidths=0.9,
+            alpha=0.95,
+            zorder=6,
+        )
 
     # Month boundaries and labels make the circular calendar readable.
     month_starts = [calendar_position(dt.date(2000, month, 1)) for month in range(1, 13)]
@@ -194,7 +231,7 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
             label_radius,
             name,
             color="#c8d0e3",
-            fontsize=8,
+            fontsize=9.5,
             fontweight="bold",
             ha="center",
             va="center",
@@ -210,7 +247,7 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
             radius,
             str(year),
             color="#929db6",
-            fontsize=6.5,
+            fontsize=7.2,
             ha="center",
             va="center",
             rotation=16,
@@ -218,13 +255,18 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
         )
 
     lightning_days = sum(count > 0 for _, count in raw_counts)
+    total_strikes = sum(count for _, count in raw_counts)
+    seasonal_strikes = sum(
+        count for date, count in raw_counts if 5 <= date.month <= 9
+    )
+    seasonal_share = seasonal_strikes / total_strikes
     ax.text(
         0.5,
         0.545,
         "STORM\nEYE",
         transform=ax.transAxes,
         color="#f7f4ff",
-        fontsize=23,
+        fontsize=25,
         fontweight="bold",
         ha="center",
         va="center",
@@ -238,7 +280,7 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
         f"PEAK  {peak_count:,}  ·  {peak_date:%d %b %Y}",
         transform=ax.transAxes,
         color="#8f9bb4",
-        fontsize=7.5,
+        fontsize=8.5,
         ha="center",
         va="center",
         linespacing=1.7,
@@ -250,7 +292,7 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
         0.965,
         "WHEN LIGHTNING STRIKES HONG KONG",
         color="#f4f6ff",
-        fontsize=17,
+        fontsize=19,
         fontweight="bold",
         ha="center",
     )
@@ -259,22 +301,31 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
         0.94,
         "Each ring is one year · each mark is one day · the outer pulse combines all twenty years",
         color="#78849e",
-        fontsize=8,
+        fontsize=9,
+        ha="center",
+    )
+    fig.text(
+        0.5,
+        0.921,
+        f"MAY–SEP CONTAINS {seasonal_share:.0%} OF ALL RECORDED STRIKES",
+        color="#86dbe4",
+        fontsize=8.2,
+        fontweight="bold",
         ha="center",
     )
 
     scale = plt.cm.ScalarMappable(norm=norm, cmap=colours)
-    colour_axis = fig.add_axes([0.31, 0.055, 0.38, 0.012])
+    colour_axis = fig.add_axes([0.31, 0.078, 0.38, 0.012])
     colourbar = fig.colorbar(scale, cax=colour_axis, orientation="horizontal")
     tick_counts = [0, 1, 10, 100, 1_000, 10_000]
     colourbar.set_ticks([log_colour(value) for value in tick_counts])
     colourbar.set_ticklabels([f"{value:,}" for value in tick_counts])
-    colourbar.ax.tick_params(colors="#9aa6be", labelsize=7, length=0, pad=4)
+    colourbar.ax.tick_params(colors="#9aa6be", labelsize=8, length=0, pad=4)
     colourbar.outline.set_visible(False)
     colourbar.set_label(
         "daily cloud-to-ground lightning count · logarithmic colour",
         color="#7e89a1",
-        fontsize=7,
+        fontsize=8,
         labelpad=7,
     )
     fig.text(
@@ -282,10 +333,10 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
         0.018,
         "Source: Hong Kong Observatory · zero is a recorded quiet day, not missing data",
         color="#5e6980",
-        fontsize=6.5,
+        fontsize=7.2,
         ha="center",
     )
-    fig.subplots_adjust(left=0.025, right=0.975, top=0.91, bottom=0.10)
+    fig.subplots_adjust(left=0.025, right=0.975, top=0.91, bottom=0.13)
 
     target = OUT / STORM_PICTURE
     fig.savefig(target, dpi=220, facecolor=fig.get_facecolor())
