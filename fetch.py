@@ -8,20 +8,19 @@ Fetch the numbers once, save the raw reply to data/, and never fetch again.
 
     uv run fetch.py
 
-Change URL and FILE. The default is the Hong Kong Observatory's daily mean
-temperature for 2026, so the template runs before you have touched it and you
-can see what a file looks like when it arrives. It is an example, not your
-phenomenon: handing it in unchanged is handing in nothing.
+The source is the Hong Kong Observatory's all-years record of the daily total
+cloud-to-ground lightning count over Hong Kong territory.
 """
 
 from pathlib import Path
 
 import requests
 
-URL = ("https://data.weather.gov.hk/weatherAPI/opendata/opendata.php"
-       "?dataType=CLMTEMP&rformat=csv&station=HKO&year=2026")      # CHANGE ME
-FILE = "hko-daily-mean-temperature-2026.csv"                          # CHANGE ME: say what it is,
-                                                                      # keep the publisher's extension
+URL = (
+    "https://data.weather.gov.hk/weatherAPI/cis/csvfile/HK/ALL/"
+    "daily_HK_LGTG_ALL.csv"
+)
+FILE = "hko-daily-cloud-to-ground-lightning-all-years.csv"
 HERE = Path(__file__).parent
 DATA = HERE / "data"
 
