@@ -4,7 +4,7 @@
 # ///
 
 """
-Turn twenty complete years of Hong Kong lightning records into a calendar heatmap.
+Turn twenty complete years of Hong Kong lightning records into a calendar heatmap and a circular calendar.
 
     uv run plot.py
 
@@ -179,32 +179,6 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
         )[0]
         line.set_solid_capstyle("round")
 
-    # Locate the record day in the rings instead of leaving the peak as text only.
-    if peak_date.year in years:
-        peak_ring = years.index(peak_date.year)
-        peak_theta = (calendar_position(peak_date) + 0.5) * day_angle
-        peak_radius = inner_radius + peak_ring * ring_step + ring_height / 2
-        ax.scatter(
-            [peak_theta],
-            [peak_radius],
-            s=125,
-            facecolors="none",
-            edgecolors="#fff1ae",
-            linewidths=3.2,
-            alpha=0.12,
-            zorder=5,
-        )
-        ax.scatter(
-            [peak_theta],
-            [peak_radius],
-            s=34,
-            facecolors="none",
-            edgecolors="#fff7cf",
-            linewidths=0.9,
-            alpha=0.95,
-            zorder=6,
-        )
-
     # Month boundaries and labels make the circular calendar readable.
     month_starts = [calendar_position(dt.date(2000, month, 1)) for month in range(1, 13)]
     month_names = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
@@ -299,7 +273,7 @@ def draw_storm_eye(years, yearly, raw_counts, peak_date, peak_count):
     fig.text(
         0.5,
         0.94,
-        "Each ring is one year · each mark is one day · the outer pulse combines all twenty years",
+        "Each ring is one year · Each colored mark is one lightning day · the outer pulse combines all twenty years",
         color="#78849e",
         fontsize=9,
         ha="center",
